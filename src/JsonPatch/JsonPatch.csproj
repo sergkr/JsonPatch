@@ -50,11 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
-    <Compile Include="Helpers\PathInfo.cs" />
+    <Compile Include="Paths\PathInfo.cs" />
     <Compile Include="JsonPatchParseException.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Formatting\JsonPatchFormatter.cs" />
-    <Compile Include="Helpers\PathHelper.cs" />
+    <Compile Include="Paths\PathHelper.cs" />
     <Compile Include="IJsonPatchDocument.cs" />
     <Compile Include="JsonPatchDocument.cs" />
     <Compile Include="JsonPatchOperation.cs" />

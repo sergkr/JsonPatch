@@ -1,4 +1,5 @@
 ﻿using JsonPatch.Extensions;
+using JsonPatch.Paths;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -88,7 +89,6 @@ namespace JsonPatch.Helpers
 
             if (currentPathComponent.IsPositiveInteger())
             {
-                //Cast it once to an iList to save CPU.
                 var listEntity = (IList)current;
                 var accessIndex = currentPathComponent.ToInt32();
 
@@ -254,7 +254,7 @@ namespace JsonPatch.Helpers
             if (operationType == JsonPatchOperationType.add && pathInfo.Property.GetValue(pathInfo.Entity) != null)
             {
                 throw new JsonPatchException(string.Format(
-                    "Invalid add on path \"{0}\": You are trying to perform an add operation on a property that already has a value.",
+                    "Invalid add operation on path \"{0}\": The path already has a value.",
                     path));
             }
 

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Reflection;
 
-namespace JsonPatch.Helpers
+namespace JsonPatch.Paths
 {
     public class PathInfo
     {
