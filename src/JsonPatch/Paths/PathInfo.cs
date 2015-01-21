@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Reflection;
 
 namespace JsonPatch.Paths
@@ -23,24 +22,6 @@ namespace JsonPatch.Paths
         public static PathInfo Invalid(string path, PathInfo parent)
         {
             return new PathInfo(path, parent) { IsValid = false };
-        }
-    }
-
-    public class PathInfoWithEntity : PathInfo
-    {
-        public PathInfoWithEntity(string path, PathInfoWithEntity parent, object entity) : base(path, parent)
-        {
-            Entity = entity;
-            Parent = parent;
-        }
-
-        public object Entity { get; set; }
-        public IList ListEntity { get; set; }
-        public new PathInfoWithEntity Parent { get; set; }
-
-        public static PathInfoWithEntity Invalid(string path, PathInfoWithEntity parent, object entity)
-        {
-            return new PathInfoWithEntity(path, parent, entity) { IsValid = false };
         }
     }
 }

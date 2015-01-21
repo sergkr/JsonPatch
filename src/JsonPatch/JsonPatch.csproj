@@ -61,6 +61,7 @@
     <Compile Include="JsonPatchOperationType.cs" />
     <Compile Include="JsonPatchException.cs" />
     <Compile Include="Model\PatchOperation.cs" />
+    <Compile Include="Paths\PathInfoWithEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
