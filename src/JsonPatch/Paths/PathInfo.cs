@@ -26,9 +26,9 @@ namespace JsonPatch.Paths
         }
     }
 
-    public class EntityPathInfo : PathInfo
+    public class PathInfoWithEntity : PathInfo
     {
-        public EntityPathInfo(string path, EntityPathInfo parent, object entity) : base(path, parent)
+        public PathInfoWithEntity(string path, PathInfoWithEntity parent, object entity) : base(path, parent)
         {
             Entity = entity;
             Parent = parent;
@@ -36,11 +36,11 @@ namespace JsonPatch.Paths
 
         public object Entity { get; set; }
         public IList ListEntity { get; set; }
-        public new EntityPathInfo Parent { get; set; }
+        public new PathInfoWithEntity Parent { get; set; }
 
-        public static EntityPathInfo Invalid(string path, EntityPathInfo parent, object entity)
+        public static PathInfoWithEntity Invalid(string path, PathInfoWithEntity parent, object entity)
         {
-            return new EntityPathInfo(path, parent, entity) { IsValid = false };
+            return new PathInfoWithEntity(path, parent, entity) { IsValid = false };
         }
     }
 }

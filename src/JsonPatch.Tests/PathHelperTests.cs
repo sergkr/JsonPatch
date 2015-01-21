@@ -1,6 +1,6 @@
 ﻿using System;
+using JsonPatch.Paths;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using JsonPatch.Helpers;
 using JsonPatch.Tests.Entitys;
 using System.Collections.Generic;
 

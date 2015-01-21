@@ -1,14 +1,10 @@
-﻿using JsonPatch.Extensions;
-using JsonPatch.Paths;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using JsonPatch.Extensions;
+using Newtonsoft.Json;
 
-namespace JsonPatch.Helpers
+namespace JsonPatch.Paths
 {
     public class PathHelper
     {
@@ -67,23 +63,23 @@ namespace JsonPatch.Helpers
             return GetPathInfo(property.PropertyType, currentPathInfo, String.Join("/", pathComponents.Skip(1)));
         }
 
-        private static EntityPathInfo GetEntityPathInfo(Type entityType, object entity, string path)
+        private static PathInfoWithEntity GetPathInfoWithEntity(Type entityType, object entity, string path)
         {
-            return GetEntityPathInfo(entityType, null, entity, path);
+            return GetPathInfoWithEntity(entityType, null, entity, path);
         }
 
-        private static EntityPathInfo GetEntityPathInfo(Type entityType, EntityPathInfo parent, object current, string path)
+        private static PathInfoWithEntity GetPathInfoWithEntity(Type entityType, PathInfoWithEntity parent, object current, string path)
         {
             if (String.IsNullOrEmpty(path))
-                return EntityPathInfo.Invalid(path, parent, current);
+                return PathInfoWithEntity.Invalid(path, parent, current);
 
             string[] pathComponents = path.Trim('/').Split('/');
             
             string currentPath = (parent == null ? "" : parent.Path) + "/" + pathComponents[0];
-            var currentPathInfo = new EntityPathInfo(currentPath, parent, current);
+            var currentPathInfo = new PathInfoWithEntity(currentPath, parent, current);
 
             if (String.IsNullOrEmpty(pathComponents[0]))
-                return EntityPathInfo.Invalid(currentPath, parent, current);
+                return PathInfoWithEntity.Invalid(currentPath, parent, current);
 
             var currentPathComponent = pathComponents[0];
 
@@ -93,7 +89,7 @@ namespace JsonPatch.Helpers
                 var accessIndex = currentPathComponent.ToInt32();
 
                 if (!typeof(IEnumerable).IsAssignableFrom(entityType))
-                    return EntityPathInfo.Invalid(currentPath, parent, current);
+                    return PathInfoWithEntity.Invalid(currentPath, parent, current);
 
                 currentPathInfo.IsValid = true;
                 currentPathInfo.IsCollectionElement = true;
@@ -107,12 +103,12 @@ namespace JsonPatch.Helpers
                     return currentPathInfo;
                 }
 
-                return GetEntityPathInfo(GetCollectionType(entityType), currentPathInfo, listEntity[accessIndex], String.Join("/", pathComponents.Skip(1)));
+                return GetPathInfoWithEntity(GetCollectionType(entityType), currentPathInfo, listEntity[accessIndex], String.Join("/", pathComponents.Skip(1)));
             }
 
             var property = entityType.GetProperties().FirstOrDefault(p => p.Name == pathComponents[0]);
             if (property == null)
-                return EntityPathInfo.Invalid(currentPath, parent, current);
+                return PathInfoWithEntity.Invalid(currentPath, parent, current);
 
             currentPathInfo.IsValid = true;
             currentPathInfo.IsCollectionElement = false;
@@ -141,7 +137,7 @@ namespace JsonPatch.Helpers
                 property.SetValue(current, propertyValue);
             }
 
-            return GetEntityPathInfo(propertyType, currentPathInfo, propertyValue, String.Join("/", pathComponents.Skip(1)));
+            return GetPathInfoWithEntity(propertyType, currentPathInfo, propertyValue, String.Join("/", pathComponents.Skip(1)));
         }
 
         private static Type GetCollectionType(Type entityType)
@@ -156,7 +152,7 @@ namespace JsonPatch.Helpers
 
         public static void SetValueFromPath(Type entityType, string path, object entity, object value, JsonPatchOperationType operationType)
         {
-            var pathInfo = GetEntityPathInfo(entityType, entity, path);
+            var pathInfo = GetPathInfoWithEntity(entityType, entity, path);
 
             if (!pathInfo.IsValid)
                 throw new JsonPatchException(String.Format("The path specified ('{0}') is invalid", path));
