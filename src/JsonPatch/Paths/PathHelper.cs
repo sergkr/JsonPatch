@@ -8,6 +8,17 @@ namespace JsonPatch.Paths
 {
     public class PathHelper
     {
+        #region IsPathValid
+        
+        public static bool IsPathValid(Type entityType, string path)
+        {
+            return GetPathInfo(entityType, path).IsValid;
+        }
+
+        #endregion
+
+        #region GetPathInfo
+
         public static PathInfo GetPathInfo(Type entityType, string path)
         {
             return GetPathInfo(entityType, null, path);
@@ -62,6 +73,10 @@ namespace JsonPatch.Paths
 
             return GetPathInfo(property.PropertyType, currentPathInfo, String.Join("/", pathComponents.Skip(1)));
         }
+
+        #endregion
+
+        #region GetPathInfoWithEntity
 
         private static PathInfoWithEntity GetPathInfoWithEntity(Type entityType, object entity, string path)
         {
@@ -140,15 +155,9 @@ namespace JsonPatch.Paths
             return GetPathInfoWithEntity(propertyType, currentPathInfo, propertyValue, String.Join("/", pathComponents.Skip(1)));
         }
 
-        private static Type GetCollectionType(Type entityType)
-        {
-            return entityType.GetElementType() ?? entityType.GetGenericArguments().First();
-        }
+        #endregion
 
-        public static bool IsPathValid(Type entityType, string path)
-        {
-            return GetPathInfo(entityType, path).IsValid;
-        }
+        #region SetValueFromPath
 
         public static void SetValueFromPath(Type entityType, string path, object entity, object value, JsonPatchOperationType operationType)
         {
@@ -257,5 +266,16 @@ namespace JsonPatch.Paths
             pathInfo.Property.SetValue(pathInfo.Entity, JsonConvert.DeserializeObject(JsonConvert.SerializeObject(value), pathInfo.Property.PropertyType));
             return;
         }
+
+        #endregion
+
+        #region Helpers
+
+        private static Type GetCollectionType(Type entityType)
+        {
+            return entityType.GetElementType() ?? entityType.GetGenericArguments().First();
+        }
+
+        #endregion
     }
 }
