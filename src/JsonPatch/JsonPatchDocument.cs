@@ -60,6 +60,11 @@ namespace JsonPatch
             });
         }
 
+        public void Move(string from, string path)
+        {
+            throw new NotImplementedException();
+        }
+
         public void ApplyUpdatesTo(TEntity entity)
         {
             foreach (var operation in _operations)
