@@ -96,8 +96,9 @@ namespace JsonPatch
                         PathHelper.SetValueFromPath(typeof(TEntity), operation.Path, entity, operation.Value, JsonPatchOperationType.add);
                         break;
                     case JsonPatchOperationType.move:
+                        var value = PathHelper.GetValueFromPath(typeof (TEntity), operation.From, entity);
                         PathHelper.SetValueFromPath(typeof(TEntity), operation.From, entity, null, JsonPatchOperationType.remove);
-                        PathHelper.SetValueFromPath(typeof(TEntity), operation.Path, entity, operation.Value, JsonPatchOperationType.add);
+                        PathHelper.SetValueFromPath(typeof(TEntity), operation.Path, entity, value, JsonPatchOperationType.replace);
                         break;
                     default:
                         throw new NotImplementedException("Operation not supported: " + operation.Operation);

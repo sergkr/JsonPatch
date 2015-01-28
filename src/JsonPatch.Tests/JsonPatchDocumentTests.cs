@@ -234,13 +234,13 @@ namespace JsonPatch.Tests
         }
 
         [TestMethod]
-        public void ApplyUpdate_MoveArrayElement_EntityUpdated()
+        public void ApplyUpdate_MoveListElement_EntityUpdated()
         {
             //Arrange
-            var patchDocument = new JsonPatchDocument<ArrayEntity>();
-            var entity = new ArrayEntity
+            var patchDocument = new JsonPatchDocument<ListEntity>();
+            var entity = new ListEntity
             {
-                Foo = new string[] { "Element One", "Element Two", "Element Three" }
+                Foo = new List<string> { "Element One", "Element Two", "Element Three" }
             };
 
             //Act
@@ -248,38 +248,38 @@ namespace JsonPatch.Tests
             patchDocument.ApplyUpdatesTo(entity);
 
             //Assert
-            Assert.AreEqual(3, entity.Foo.Length);
+            Assert.AreEqual(3, entity.Foo.Count);
             Assert.AreEqual("Element One", entity.Foo[0]);
             Assert.AreEqual("Element Three", entity.Foo[1]);
             Assert.AreEqual("Element Two", entity.Foo[2]);
         }
 
         [TestMethod]
-        public void ApplyUpdate_MoveFromArrayToProperty_EntityUpdated()
+        public void ApplyUpdate_MoveFromListToProperty_EntityUpdated()
         {
             //Arrange
             var patchDocument = new JsonPatchDocument<ComplexEntity>();
             var entity = new ComplexEntity
             {
-                Foo = new ArrayEntity
+                Bar = new SimpleEntity(),
+                Norf = new List<ListEntity>
                 {
-                    Foo = new string[] { "Foo One", "Foo Two", "Foo Three" }
-                },
-                Qux = new List<SimpleEntity>
-                {
-                    new SimpleEntity { Foo = "bar" }
+                    new ListEntity
+                    {
+                        Foo = new List<string> { "Element One", "Element Two", "Element Three" }
+                    }
                 }
             };
 
             //Act
-            patchDocument.Move("/Foo/Foo/1", "/Qux/0/Foo");
+            patchDocument.Move("/Norf/0/Foo/1", "/Bar/Foo");
             patchDocument.ApplyUpdatesTo(entity);
 
             //Assert
-            Assert.AreEqual(2, entity.Foo.Foo.Length);
-            Assert.AreEqual("Foo One", entity.Foo.Foo[0]);
-            Assert.AreEqual("Foo Three", entity.Foo.Foo[1]);
-            Assert.AreEqual("Foo Two", entity.Qux[0].Foo);
+            Assert.AreEqual(2, entity.Norf[0].Foo.Count);
+            Assert.AreEqual("Element One", entity.Norf[0].Foo[0]);
+            Assert.AreEqual("Element Three", entity.Norf[0].Foo[1]);
+            Assert.AreEqual("Element Two", entity.Bar.Foo);
         }
 
         #endregion
