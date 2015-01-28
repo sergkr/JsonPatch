@@ -33,14 +33,15 @@ namespace JsonPatch.Paths
                 throw new JsonPatchParseException("Path may not be empty.");
             }
 
-            // Trim any leading and trailing slashes from the path. Modify the path variable itself so that
-            // any character positions we report in error messages are accurate.
-            path = path.Trim('/');
+            // Normalize the path by ensuring it begins with a single forward slash, and has
+            // no trailing slashes. Modify the path variable itself so that any character
+            // positions we report in error messages are accurate.
+            path = "/" + path.Trim('/');
 
             // Keep track of our current position in the path string (for error reporting).
-            int pos = 0;
+            int pos = 1;
 
-            var pathComponents = path.Split('/');
+            var pathComponents = path.Split('/').Skip(1).ToArray();
             var parsedComponents = new PathComponent[pathComponents.Length];
 
             for (int i = 0; i < pathComponents.Length; i++)
@@ -55,7 +56,9 @@ namespace JsonPatch.Paths
                 catch (JsonPatchParseException e)
                 {
                     throw new JsonPatchParseException(string.Format(
-                        "The path \"{0}\" is not valid at position {1}. See the inner exception for details.", path, pos), e);
+                        "The path \"{0}\" is not valid: {1}\n" +
+                        "(Error occurred while parsing path component \"{2}\" at character position {3}.)",
+                        path, e.Message, pathComponent, pos), e);
                 }
 
                 pos += pathComponent.Length + 1;
@@ -64,7 +67,7 @@ namespace JsonPatch.Paths
             return parsedComponents;
         }
 
-        public static PathComponent ParsePathComponent(string component, Type rootEntityType, PathComponent previous = null)
+        private static PathComponent ParsePathComponent(string component, Type rootEntityType, PathComponent previous = null)
         {
             if (string.IsNullOrWhiteSpace(component))
             {
@@ -126,7 +129,7 @@ namespace JsonPatch.Paths
         {
             if (entity == null)
             {
-                throw new JsonPatchException("Entity is null");
+                throw new JsonPatchException("Cannot get value from null entity.");
             }
 
             object previous = entity;
