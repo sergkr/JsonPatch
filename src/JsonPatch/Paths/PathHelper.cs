@@ -118,14 +118,14 @@ namespace JsonPatch.Paths
 
         #endregion
 
-        #region Get/Set Values
+        #region GetValueFromPath
 
         public static object GetValueFromPath(Type entityType, string path, object entity)
         {
             return GetValueFromPath(entityType, ParsePath(path, entityType), entity);
         }
 
-        public static object GetValueFromPath(Type entityType, IEnumerable<PathComponent> pathComponents, object entity)
+        public static object GetValueFromPath(Type entityType, PathComponent[] pathComponents, object entity)
         {
             if (entity == null)
             {
@@ -161,10 +161,18 @@ namespace JsonPatch.Paths
             return previous;
         }
 
+        #endregion
+
+        #region SetValueFromPath
+
         public static void SetValueFromPath(Type entityType, string path, object entity, object value, JsonPatchOperationType operationType)
         {
-            var pathComponents = ParsePath(path, entityType);
-            object previous = GetValueFromPath(entityType, pathComponents.Take(pathComponents.Length - 1), entity);
+            SetValueFromPath(entityType, ParsePath(path, entityType), entity, value, operationType);
+        }
+
+        public static void SetValueFromPath(Type entityType, PathComponent[] pathComponents, object entity, object value, JsonPatchOperationType operationType)
+        {
+            object previous = GetValueFromPath(entityType, pathComponents.Take(pathComponents.Length - 1).ToArray(), entity);
 
             if (previous == null)
             {
