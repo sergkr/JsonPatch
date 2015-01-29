@@ -267,14 +267,17 @@ namespace JsonPatch.Tests
             Assert.AreEqual("New Value", entity.Foo);
         }
 
-        [TestMethod, ExpectedException(typeof(JsonPatchException))]
-        public void SetValueFromPath_SimplePathAddValueToNonNull_ThrowsJsonPatchException()
+        [TestMethod]
+        public void SetValueFromPath_SimplePathAddValueToNonNull_UpdatesValue()
         {
             //arrange
             var entity = new SimpleEntity { Foo = "Existing Value" };
 
             //act
             PathHelper.SetValueFromPath(typeof(SimpleEntity), "/Foo", entity, "New Value", JsonPatchOperationType.add);
+
+            //assert
+            Assert.AreEqual("New Value", entity.Foo);
         }
 
         [TestMethod]

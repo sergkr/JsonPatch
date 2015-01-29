@@ -179,18 +179,11 @@ namespace JsonPatch.Paths
                     switch (operationType)
                     {
                         case JsonPatchOperationType.add:
-                            object current = component.PropertyInfo.GetValue(previous);
-                            if (current != null)
-                            {
-                                throw new JsonPatchException("Invalid add: property already has a value.");
-                            }
+                        case JsonPatchOperationType.replace:
                             component.PropertyInfo.SetValue(previous, ConvertValue(value, component.ComponentType));
                             break;
                         case JsonPatchOperationType.remove:
                             component.PropertyInfo.SetValue(previous, null);
-                            break;
-                        case JsonPatchOperationType.replace:
-                            component.PropertyInfo.SetValue(previous, ConvertValue(value, component.ComponentType));
                             break;
                         default:
                             throw new ArgumentOutOfRangeException("operationType");
