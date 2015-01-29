@@ -174,7 +174,7 @@ namespace JsonPatch.Paths
             catch (Exception e)
             {
                 throw new JsonPatchException(string.Format(
-                    "Cannot get value from path \"{0}\": {1}",
+                    "Failed to get value from path \"{0}\": {1}",
                     PathComponent.GetFullPath(pathComponents), e.Message), e);
             }
         }
@@ -190,54 +190,66 @@ namespace JsonPatch.Paths
 
         public static void SetValueFromPath(Type entityType, PathComponent[] pathComponents, object entity, object value, JsonPatchOperationType operationType)
         {
-            object previous = GetValueFromPath(entityType, pathComponents.Take(pathComponents.Length - 1).ToArray(), entity);
-
-            if (previous == null)
+            try
             {
-                throw new JsonPatchException("Previous path component is null");
+                PathComponent[] parent = pathComponents.Take(pathComponents.Length - 1).ToArray();
+                string parentPath = PathComponent.GetFullPath(parent);
+
+                object previous = GetValueFromPath(entityType, parent, entity);
+
+                if (previous == null)
+                {
+                    throw new JsonPatchException(string.Format("Value at parent path \"{0}\" is null.", parentPath));
+                }
+
+                var target = pathComponents.Last();
+
+                TypeSwitch.On(target)
+                    .Case((PropertyPathComponent component) =>
+                    {
+                        switch (operationType)
+                        {
+                            case JsonPatchOperationType.add:
+                            case JsonPatchOperationType.replace:
+                                component.PropertyInfo.SetValue(previous, ConvertValue(value, component.ComponentType));
+                                break;
+                            case JsonPatchOperationType.remove:
+                                component.PropertyInfo.SetValue(previous, null);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException("operationType");
+                        }
+                    })
+                    .Case((CollectionIndexPathComponent component) =>
+                    {
+                        var list = previous as IList;
+                        if (list == null)
+                        {
+                            throw new JsonPatchException(string.Format("Value at parent path \"{0}\" is not a valid collection.", parentPath));
+                        }
+
+                        switch (operationType)
+                        {
+                            case JsonPatchOperationType.add:
+                                list.Insert(component.CollectionIndex, ConvertValue(value, component.ComponentType));
+                                break;
+                            case JsonPatchOperationType.remove:
+                                list.RemoveAt(component.CollectionIndex);
+                                break;
+                            case JsonPatchOperationType.replace:
+                                list[component.CollectionIndex] = ConvertValue(value, component.ComponentType);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException("operationType");
+                        }
+                    });
             }
-
-            var target = pathComponents.Last();
-
-            TypeSwitch.On(target)
-                .Case((PropertyPathComponent component) =>
-                {
-                    switch (operationType)
-                    {
-                        case JsonPatchOperationType.add:
-                        case JsonPatchOperationType.replace:
-                            component.PropertyInfo.SetValue(previous, ConvertValue(value, component.ComponentType));
-                            break;
-                        case JsonPatchOperationType.remove:
-                            component.PropertyInfo.SetValue(previous, null);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException("operationType");
-                    }
-                })
-                .Case((CollectionIndexPathComponent component) =>
-                {
-                    var list = previous as IList;
-                    if (list == null)
-                    {
-                        throw new JsonPatchException("Invalid collection");
-                    }
-
-                    switch (operationType)
-                    {
-                        case JsonPatchOperationType.add:
-                            list.Insert(component.CollectionIndex, ConvertValue(value, component.ComponentType));
-                            break;
-                        case JsonPatchOperationType.remove:
-                            list.RemoveAt(component.CollectionIndex);
-                            break;
-                        case JsonPatchOperationType.replace:
-                            list[component.CollectionIndex] = ConvertValue(value, component.ComponentType);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException("operationType");
-                    }
-                });
+            catch (Exception e)
+            {
+                throw new JsonPatchException(string.Format(
+                    "Failed to set value at path \"{0}\" while performing \"{1}\" operation: {2}",
+                    PathComponent.GetFullPath(pathComponents), operationType, e.Message), e);
+            }
         }
 
         #endregion

@@ -530,7 +530,7 @@ namespace JsonPatch.Tests
             Assert.AreEqual(2, entity.Foo.Count);
         }
 
-        [TestMethod, ExpectedException(typeof(IndexOutOfRangeException))]
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
         public void SetValueFromPath_ReplaceIndexOutOfBounds_ThrowsException()
         {
             //Arrange
@@ -543,7 +543,7 @@ namespace JsonPatch.Tests
             PathHelper.SetValueFromPath(typeof(ArrayEntity), "/Foo/2", entity, "Element Two Updated", JsonPatchOperationType.replace);
         }
 
-        [TestMethod, ExpectedException(typeof(NotSupportedException))]
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
         public void SetValueFromPath_AddArrayValue_ThrowsError()
         {
             //Arrange
@@ -555,7 +555,8 @@ namespace JsonPatch.Tests
             //act
             PathHelper.SetValueFromPath(typeof(ArrayEntity), "/Foo/2", entity, "Element Three", JsonPatchOperationType.add);
 
-            // Arrays should not support resizing. Expect NotSupportedException: Collection was of a fixed size.
+            // Arrays should not support resizing. Expect JsonPatchException with an inner exception of type
+            // NotSupportedException: Collection was of a fixed size.
         }
 
         [TestMethod]
@@ -604,7 +605,7 @@ namespace JsonPatch.Tests
             Assert.AreEqual(3, entity.Foo.Count);
         }
 
-        [TestMethod, ExpectedException(typeof(NotSupportedException))]
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
         public void SetValueFromPath_RemoveArrayValue_ThrowsException()
         {
             //Arrange
@@ -616,7 +617,8 @@ namespace JsonPatch.Tests
             //act
             PathHelper.SetValueFromPath(typeof(ArrayEntity), "/Foo/1", entity, null, JsonPatchOperationType.remove);
 
-            // Arrays should not support resizing. Expect NotSupportedException: Collection was of a fixed size
+            // Arrays should not support resizing. Expect JsonPatchException with an inner exception of type
+            // NotSupportedException: Collection was of a fixed size
         }
 
         [TestMethod]
@@ -786,7 +788,7 @@ namespace JsonPatch.Tests
             Assert.AreEqual("Element One - Updated", entity.Foo.Foo[0]);
         }
 
-        [TestMethod, ExpectedException(typeof(NotSupportedException))]
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
         public void SetValueFromPath_AddToNestedArray_ThrowsException()
         {
             //arrange
