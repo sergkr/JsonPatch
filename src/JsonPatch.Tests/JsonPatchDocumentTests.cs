@@ -144,16 +144,6 @@ namespace JsonPatch.Tests
             patchDocument.Move("Foo", "BazMissing");
         }
 
-        [TestMethod, ExpectedException(typeof(JsonPatchParseException))]
-        public void Move_IncompatibleTypes_ThrowsJsonPatchParseException()
-        {
-            //Arrange
-            var patchDocument = new JsonPatchDocument<ComplexEntity>();
-
-            //Act
-            patchDocument.Move("Foo/Foo/5", "/Baz/0");      // Attempt to assign string to an object of type SimpleEntity
-        }
-
         #endregion
 
         #region JsonPatch ApplyUpdatesTo Tests
