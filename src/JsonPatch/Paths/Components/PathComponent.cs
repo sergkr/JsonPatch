@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace JsonPatch.Paths.Components
 {
@@ -21,6 +22,11 @@ namespace JsonPatch.Paths.Components
                 return typeof(IEnumerable<>).IsAssignableFrom(ComponentType) ||
                        typeof(IEnumerable).IsAssignableFrom(ComponentType);
             }
+        }
+
+        public static string GetFullPath(IEnumerable<PathComponent> pathComponents)
+        {
+            return "/" + string.Join("/", pathComponents.Select(p => p.Name));
         }
     }
 }

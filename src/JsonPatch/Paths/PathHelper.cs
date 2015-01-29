@@ -127,38 +127,56 @@ namespace JsonPatch.Paths
 
         public static object GetValueFromPath(Type entityType, PathComponent[] pathComponents, object entity)
         {
-            if (entity == null)
+            try
             {
-                throw new JsonPatchException("Cannot get value from null entity.");
+                if (entity == null)
+                {
+                    throw new JsonPatchException("The root object is null.");
+                }
+
+                object previous = entity;
+
+                for (int i = 0; i < pathComponents.Length; i++)
+                {
+                    string parentPath = PathComponent.GetFullPath(pathComponents.Take(i));
+                    var pathComponent = pathComponents[i];
+
+                    TypeSwitch.On(pathComponent)
+                        .Case((PropertyPathComponent component) =>
+                        {
+                            if (previous == null)
+                            {
+                                throw new JsonPatchException(string.Format(
+                                    "Cannot get property \"{0}\" from null object at path \"{1}\".",
+                                    component.Name, parentPath));
+                            }
+
+                            previous = component.PropertyInfo.GetValue(previous);
+                        })
+                        .Case((CollectionIndexPathComponent component) =>
+                        {
+                            try
+                            {
+                                var list = (IList) previous;
+                                previous = list[component.CollectionIndex];
+                            }
+                            catch (Exception e)
+                            {
+                                throw new JsonPatchException(string.Format(
+                                    "Cannot access index {0} from collection at path \"{1}\".",
+                                    component.CollectionIndex, parentPath), e);
+                            }
+                        });
+                }
+
+                return previous;
             }
-
-            object previous = entity;
-
-            foreach (var pathComponent in pathComponents)
+            catch (Exception e)
             {
-                TypeSwitch.On(pathComponent)
-                    .Case((PropertyPathComponent component) =>
-                    {
-                        if (previous == null)
-                        {
-                            throw new JsonPatchException(string.Format("Cannot get property {0} from null.", component.Name));
-                        }
-
-                        previous = component.PropertyInfo.GetValue(previous);
-                    })
-                    .Case((CollectionIndexPathComponent component) =>
-                    {
-                        if (previous == null)
-                        {
-                            throw new JsonPatchException(string.Format("Cannot access index {0} from null", component.CollectionIndex));
-                        }
-
-                        var list = (IList)previous;
-                        previous = list[component.CollectionIndex];
-                    });
+                throw new JsonPatchException(string.Format(
+                    "Cannot get value from path \"{0}\": {1}",
+                    PathComponent.GetFullPath(pathComponents), e.Message), e);
             }
-
-            return previous;
         }
 
         #endregion

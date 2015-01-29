@@ -243,6 +243,166 @@ namespace JsonPatch.Tests
 
         #endregion
 
+        #region GetValueFromPath
+
+        #region Operations on simple paths
+
+        [TestMethod]
+        public void GetValueFromPath_SimplePropertyOnRoot_ReturnsValue()
+        {
+            //arrange
+            var entity = new SimpleEntity
+            {
+                Foo = "I am foo"
+            };
+
+            //act
+            var value = PathHelper.GetValueFromPath(typeof(SimpleEntity), "/Foo", entity);
+
+            //assert
+            Assert.AreEqual("I am foo", value);
+        }
+
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
+        public void GetValueFromPath_NullRoot_ThrowsException()
+        {
+            //act
+            PathHelper.GetValueFromPath(typeof(SimpleEntity), "/Foo", null);
+        }
+
+        [TestMethod, ExpectedException(typeof(JsonPatchParseException))]
+        public void GetValueFromPath_MissingProperty_ThrowsException()
+        {
+            //arrange
+            var entity = new SimpleEntity
+            {
+                Foo = "I am foo"
+            };
+
+            //act
+            PathHelper.GetValueFromPath(typeof(SimpleEntity), "/FooMissing", entity);
+        }
+
+        #endregion
+
+        #region operations on list/array indexes
+
+        [TestMethod]
+        public void GetValueFromPath_CollectionIndexOnRoot_ReturnsValue()
+        {
+            //Arrange
+            var entity = new ArrayEntity
+            {
+                Foo = new string[] { "Element One", "Element Two" }
+            };
+
+            //act
+            var value = PathHelper.GetValueFromPath(typeof(ArrayEntity), "/Foo/1", entity);
+
+            //Assert
+            Assert.AreEqual("Element Two", value);
+        }
+
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
+        public void GetValueFromPath_InvalidCollectionIndex_ThrowsException()
+        {
+            //Arrange
+            var entity = new ArrayEntity
+            {
+                Foo = new string[] { "Element One", "Element Two" }
+            };
+
+            //act
+            PathHelper.GetValueFromPath(typeof(ArrayEntity), "/Foo/5", entity);
+        }
+
+        #endregion
+
+        #region Operations on complex paths
+
+        [TestMethod]
+        public void GetValueFromPath_ComplexPath_ReturnsValue()
+        {
+            //arrange
+            var entity = new ComplexEntity
+            {
+                Bar = new SimpleEntity
+                {
+                    Foo = "I am foo"
+                }
+            };
+
+            //act
+            var value = PathHelper.GetValueFromPath(typeof(ComplexEntity), "/Bar/Foo", entity);
+
+            //assert
+            Assert.AreEqual("I am foo", value);
+        }
+
+        [TestMethod]
+        public void GetValueFromPath_ValidCollectionIndexOnComplexObject_ReturnsValue()
+        {
+            //arrange
+            var entity = new ComplexEntity
+            {
+                Norf = new List<ListEntity>
+                {
+                    new ListEntity { Foo = new List<string> { "A1", "A2", "A3" } },
+                    new ListEntity { Foo = new List<string> { "B1", "B2", "B3" } }
+                }
+            };
+
+            //act
+            var value = PathHelper.GetValueFromPath(typeof(ComplexEntity), "/Norf/1/Foo/2", entity);
+
+            //assert
+            Assert.AreEqual("B3", value);
+        }
+
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
+        public void GetValueFromPath_NullParent_ThrowsException()
+        {
+            //arrange
+            var entity = new ComplexEntity { };
+
+            //act
+            PathHelper.GetValueFromPath(typeof(ComplexEntity), "/Bar/Foo", entity);
+        }
+
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
+        public void GetValueFromPath_InvalidCollectionIndexOnIntermediatePathComponent_ThrowsException()
+        {
+            //Arrange
+            var entity = new ComplexEntity
+            {
+                Qux = new List<SimpleEntity>
+                {
+                    new SimpleEntity(),
+                    new SimpleEntity { Foo = "I am foo" }
+                }
+            };
+
+            //act
+            PathHelper.GetValueFromPath(typeof(ComplexEntity), "/Qux/5/Foo", entity);
+        }
+
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
+        public void GetValueFromPath_NullCollection_ThrowsException()
+        {
+            //Arrange
+            var entity = new ComplexEntity
+            {
+                Norf = new List<ListEntity> { null }
+            };
+
+            //act
+            PathHelper.GetValueFromPath(typeof(ComplexEntity), "/Norf/0/Foo/0", entity);
+        }
+
+        #endregion
+
+        #endregion
+
         #region SetValueFromPath
 
         #region Operations on simple paths
@@ -591,7 +751,7 @@ namespace JsonPatch.Tests
             Assert.IsNull(entity.Qux[0].Foo);
         }
 
-        [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
         public void SetValueFromPath_AddToListItemOutOfBounds_ThrowsException()
         {
             //arrange
