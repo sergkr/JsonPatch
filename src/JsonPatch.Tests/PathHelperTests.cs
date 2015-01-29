@@ -656,7 +656,7 @@ namespace JsonPatch.Tests
         }
 
 
-        [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [TestMethod, ExpectedException(typeof(JsonPatchException))]
         public void SetValueFromPath_RemoveIndexOutOfBounds_ThrowsException()
         {
             //Arrange
