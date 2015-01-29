@@ -829,6 +829,47 @@ namespace JsonPatch.Tests
 
         #endregion
 
+        [TestMethod]
+        public void SetValueFromPath_ComplexValue_SetsValue()
+        {
+            //arrange
+            var entity = new ComplexEntity { };
+            var value = new SimpleEntity
+            {
+                Foo = "I am foo",
+                Bar = 12,
+                Baz = "I am baz"
+            };
+
+            // act
+            PathHelper.SetValueFromPath(typeof(ComplexEntity), "/Bar", entity, value, JsonPatchOperationType.add);
+
+            //assert
+            Assert.AreEqual("I am foo", entity.Bar.Foo);
+            Assert.AreEqual(12, entity.Bar.Bar);
+            Assert.AreEqual("I am baz", entity.Bar.Baz);
+        }
+
+        [TestMethod]
+        public void SetValueFromPath_ComplexValueWithCollections_Sets()
+        {
+            //arrange
+            var entity = new ComplexEntity { };
+            var value = new ArrayEntity
+            {
+                Foo = new[] { "Element One", "Element Two", "Element Three" }
+            };
+
+            // act
+            PathHelper.SetValueFromPath(typeof(ComplexEntity), "/Foo", entity, value, JsonPatchOperationType.add);
+
+            //assert
+            Assert.AreEqual(3, entity.Foo.Foo.Length);
+            Assert.AreEqual("Element One", entity.Foo.Foo[0]);
+            Assert.AreEqual("Element Two", entity.Foo.Foo[1]);
+            Assert.AreEqual("Element Three", entity.Foo.Foo[2]);
+        }
+
         #endregion
     }
 }
